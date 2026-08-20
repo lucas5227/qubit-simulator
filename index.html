@@ -1,281 +1,250 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Interactive Single Qubit Simulator</title>
+<title>Interactive Multi-Qubit Simulator</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#0b1020;
+  color:#e8ecf5;
+  font-family:Arial,Helvetica,sans-serif
 }
 
-body {
-  margin: 0;
-  background: #0b1020;
-  color: #e8ecf5;
-  font-family: Arial, Helvetica, sans-serif;
+header{
+  height:64px;
+  display:flex;
+  align-items:center;
+  padding:0 28px;
+  background:#10172a;
+  border-bottom:1px solid #26324f
 }
 
-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 28px;
-  border-bottom: 1px solid #26324f;
-  background: #10172a;
+header h1{
+  margin:0;
+  font-size:21px
 }
 
-header h1 {
-  margin: 0;
-  font-size: 22px;
+header span{
+  margin-left:18px;
+  color:#8fa2c9;
+  font-size:13px
 }
 
-header span {
-  margin-left: 18px;
-  color: #8fa2c9;
-  font-size: 13px;
+.layout{
+  max-width:1500px;
+  margin:auto;
+  padding:16px;
+  display:grid;
+  grid-template-columns:1.25fr 1fr;
+  gap:14px
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 14px;
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 16px;
+.full{grid-column:1/3}
+
+.panel{
+  background:#11192c;
+  border:1px solid #293756;
+  border-radius:12px;
+  padding:18px
 }
 
-.panel {
-  background: #11192c;
-  border: 1px solid #293756;
-  border-radius: 12px;
-  padding: 18px;
+.panel h2{
+  margin:0 0 14px;
+  font-size:17px
 }
 
-.panel h2 {
-  margin: 0 0 16px;
-  font-size: 17px;
+button,select,input{
+  background:#18233b;
+  border:1px solid #415174;
+  color:white;
+  border-radius:7px;
+  padding:8px 10px
 }
 
-.full {
-  grid-column: 1 / 3;
+button{cursor:pointer}
+button:hover{filter:brightness(1.15)}
+
+.primary{background:#1e63d7}
+.danger{background:#7c2630}
+
+.toolbar,
+.palette,
+.two-gate,
+.measure-controls{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px
 }
 
-/* Gate Palette */
-
-.palette {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.palette button {
-  min-width: 58px;
-  font-weight: bold;
+.separator{
+  width:1px;
+  height:30px;
+  background:#35415c;
+  margin:0 4px
 }
 
 /* Circuit */
 
-.circuit-scroll {
-  overflow-x: auto;
-  padding-bottom: 10px;
+.circuit-scroll{
+  overflow-x:auto
 }
 
-.circuit {
-  display: flex;
-  align-items: center;
-  min-height: 150px;
-  min-width: max-content;
-  gap: 8px;
+.circuit{
+  min-width:max-content;
+  padding:10px 0
 }
 
-.ket {
-  font-family: Georgia, serif;
-  font-size: 26px;
-  padding-right: 4px;
+.lane{
+  display:flex;
+  align-items:center;
+  min-height:62px
 }
 
-.wire {
-  width: 28px;
-  height: 2px;
-  background: #637596;
-  flex-shrink: 0;
+.q-label{
+  width:80px;
+  flex:none;
+  font-family:Georgia,serif;
+  font-size:20px
 }
 
-.gate-card {
-  min-width: 120px;
-  background: #18233a;
-  border: 1px solid #405171;
-  border-radius: 9px;
-  padding: 10px;
-  text-align: center;
+.wire{
+  height:2px;
+  width:22px;
+  background:#687895;
+  flex:none
 }
 
-.gate-name {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 8px;
+.gate-card{
+  min-width:105px;
+  text-align:center;
+  background:#18233a;
+  border:1px solid #455474;
+  border-radius:8px;
+  padding:7px;
+  margin:0 3px
 }
 
-.gate-angle {
-  width: 75px;
-  background: #0b1325;
-  color: white;
-  border: 1px solid #42506c;
-  border-radius: 5px;
-  padding: 5px;
-  margin-bottom: 8px;
+.gate-name{
+  font-weight:bold;
+  margin-bottom:4px
 }
 
-.gate-actions {
-  display: flex;
-  gap: 4px;
-  justify-content: center;
+.gate-meta{
+  color:#9caaca;
+  font-size:11px;
+  margin-bottom:5px
 }
 
-.gate-actions button {
-  padding: 4px 7px;
-  font-size: 12px;
+.angle-input{
+  width:68px;
+  padding:4px
 }
 
-.measure-gate {
-  padding: 15px;
-  background: #3d4663;
-  border-radius: 7px;
-  font-size: 21px;
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:3px;
+  margin-top:5px
 }
 
-/* Buttons */
-
-button,
-select,
-input[type="number"] {
-  background: #18233b;
-  border: 1px solid #415174;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 7px;
+.actions button{
+  padding:3px 6px;
+  font-size:11px
 }
 
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  filter: brightness(1.15);
-}
-
-.primary {
-  background: #1e63d7;
-}
-
-.danger {
-  background: #7c2630;
+.placeholder{
+  min-width:105px;
+  margin:0 3px
 }
 
 /* Bloch */
 
-.bloch-wrapper {
-  display: flex;
-  justify-content: center;
+.bloch-wrap{
+  display:flex;
+  justify-content:center
 }
 
-canvas {
-  max-width: 100%;
+canvas{
+  max-width:100%
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.note{
+  font-size:13px;
+  line-height:1.5;
+  background:#171d2b;
+  border-left:4px solid #f5c542;
+  padding:11px;
+  margin-top:10px
 }
 
-.stat {
-  background: #0d1528;
-  border: 1px solid #293756;
-  border-radius: 8px;
-  padding: 10px;
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  font-size:13px
 }
 
-.stat-label {
-  color: #91a1bd;
-  font-size: 12px;
+.table th,.table td{
+  padding:8px;
+  border-bottom:1px solid #293756;
+  text-align:center
 }
 
-.stat-value {
-  margin-top: 5px;
-  font-family: monospace;
-  font-size: 16px;
-  word-break: break-all;
+.table th{
+  color:#9eafd0
 }
 
-/* Measurement */
+/* Histogram */
 
-.measurement-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 18px;
+.histogram{
+  max-height:360px;
+  overflow-y:auto;
+  margin-top:14px
 }
 
-.histogram {
-  margin-top: 20px;
+.bar-row{
+  display:grid;
+  grid-template-columns:70px 1fr 150px;
+  align-items:center;
+  gap:8px;
+  margin:7px 0
 }
 
-.bar-row {
-  display: grid;
-  grid-template-columns: 30px 1fr 150px;
-  align-items: center;
-  gap: 10px;
-  margin: 12px 0;
+.bar-bg{
+  height:25px;
+  background:#0c1425;
+  border-radius:5px;
+  overflow:hidden
 }
 
-.bar-bg {
-  height: 32px;
-  background: #0c1425;
-  border-radius: 5px;
-  overflow: hidden;
+.bar{
+  height:100%;
+  background:#2f8cff
 }
 
-.bar {
-  height: 100%;
-  transition: width .2s;
+.state-box{
+  background:#0d1528;
+  border:1px solid #293756;
+  border-radius:8px;
+  padding:10px;
+  font-family:monospace;
+  font-size:12px;
+  max-height:180px;
+  overflow:auto;
+  line-height:1.5
 }
 
-#bar0 {
-  background: #2f8cff;
-}
-
-#bar1 {
-  background: #ff5d6c;
-}
-
-.explanation {
-  margin-top: 16px;
-  padding: 14px;
-  border-left: 4px solid #f5c542;
-  background: #171d2b;
-  line-height: 1.6;
-  color: #ccd6e8;
-}
-
-.empty-circuit {
-  color: #8190ad;
-  padding: 30px 10px;
-}
-
-@media(max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .full {
-    grid-column: 1;
-  }
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .full{grid-column:1}
 }
 </style>
 </head>
@@ -283,1210 +252,1572 @@ canvas {
 <body>
 
 <header>
-  <h1>Interactive Single Qubit Simulator</h1>
-  <span>Build Circuit → Bloch Sphere → Measurement → Shots</span>
+<h1>Interactive Multi-Qubit Simulator</h1>
+<span>Build Circuit → Bloch Vectors → Measurement → Shots</span>
 </header>
 
 <div class="layout">
 
-  <!-- Circuit Builder -->
-  <section class="panel full">
+<!-- Composer -->
+<section class="panel full">
 
-    <h2>Quantum Circuit Composer</h2>
+<h2>Quantum Circuit Composer</h2>
 
-    <div class="palette">
-      <button onclick="addGate('RX')">RX</button>
-      <button onclick="addGate('RY')">RY</button>
-      <button onclick="addGate('RZ')">RZ</button>
+<div class="toolbar">
 
-      <button onclick="addGate('H')">H</button>
-      <button onclick="addGate('X')">X</button>
-      <button onclick="addGate('Y')">Y</button>
-      <button onclick="addGate('Z')">Z</button>
-      <button onclick="addGate('S')">S</button>
-      <button onclick="addGate('T')">T</button>
+<button onclick="addQubit()">+ Qubit</button>
+<button onclick="removeQubit()">− Qubit</button>
 
-      <button onclick="presetRYRZ()">RY60 → RZ90</button>
-      <button class="danger" onclick="clearCircuit()">Clear Circuit</button>
-      <button onclick="resetAll()">Reset All</button>
-    </div>
+<span id="qubitInfo"></span>
 
-    <div class="circuit-scroll">
-      <div id="circuit" class="circuit"></div>
-    </div>
+<div class="separator"></div>
 
-  </section>
+<label>
+Target
+<select id="targetQubit"></select>
+</label>
+
+</div>
+
+<div class="palette">
+
+<button onclick="addSingleGate('RX')">RX</button>
+<button onclick="addSingleGate('RY')">RY</button>
+<button onclick="addSingleGate('RZ')">RZ</button>
+
+<button onclick="addSingleGate('H')">H</button>
+<button onclick="addSingleGate('X')">X</button>
+<button onclick="addSingleGate('Y')">Y</button>
+<button onclick="addSingleGate('Z')">Z</button>
+<button onclick="addSingleGate('S')">S</button>
+<button onclick="addSingleGate('T')">T</button>
+
+</div>
+
+<div class="two-gate">
+
+<b>2-Qubit Gates</b>
+
+<label>
+Control
+<select id="controlQubit"></select>
+</label>
+
+<label>
+Target
+<select id="twoTargetQubit"></select>
+</label>
+
+<button onclick="addTwoGate('CNOT')">CNOT</button>
+<button onclick="addTwoGate('CZ')">CZ</button>
+
+<div class="separator"></div>
+
+<button onclick="qrcPreset()">3-Qubit QRC Preset</button>
+<button class="danger" onclick="clearCircuit()">Clear Circuit</button>
+<button onclick="resetAll()">Reset</button>
+
+</div>
+
+<div class="circuit-scroll">
+<div id="circuit" class="circuit"></div>
+</div>
+
+</section>
 
 
-  <!-- Bloch Sphere -->
-  <section class="panel">
+<!-- Bloch -->
+<section class="panel">
 
-    <h2>Bloch Sphere & State</h2>
+<h2>Qubit Bloch Vectors</h2>
 
-    <div class="bloch-wrapper">
-      <canvas
-        id="blochCanvas"
-        width="500"
-        height="430">
-      </canvas>
-    </div>
+<div class="bloch-wrap">
+<canvas id="blochCanvas" width="600" height="480"></canvas>
+</div>
 
-    <div class="stats-grid">
+<div class="note">
+각 화살표는 해당 qubit의 reduced state에서 계산한
+⟨Xᵢ⟩, ⟨Yᵢ⟩, ⟨Zᵢ⟩입니다.
+얽힘이 생기면 개별 qubit은 순수상태가 아닐 수 있으므로
+Bloch vector 길이가 1보다 작아질 수 있습니다.
+</div>
 
-      <div class="stat">
-        <div class="stat-label">⟨X⟩</div>
-        <div class="stat-value" id="xExp"></div>
-      </div>
+<table class="table">
+<thead>
+<tr>
+<th>Qubit</th>
+<th>⟨X⟩</th>
+<th>⟨Y⟩</th>
+<th>⟨Z⟩</th>
+<th>|r|</th>
+</tr>
+</thead>
+<tbody id="blochTable"></tbody>
+</table>
 
-      <div class="stat">
-        <div class="stat-label">⟨Y⟩</div>
-        <div class="stat-value" id="yExp"></div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">⟨Z⟩</div>
-        <div class="stat-value" id="zExp"></div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Statevector</div>
-        <div class="stat-value" id="stateText"></div>
-      </div>
-
-    </div>
-
-  </section>
+</section>
 
 
-  <!-- Measurement -->
-  <section class="panel">
+<!-- Measurement -->
+<section class="panel">
 
-    <h2>Measurement & Sampling</h2>
+<h2>Measurement & Sampling</h2>
 
-    <div class="measurement-controls">
+<div class="measure-controls">
 
-      <label>
-        Basis
-        <select id="basis">
-          <option value="Z">Z</option>
-          <option value="X">X</option>
-          <option value="Y">Y</option>
-        </select>
-      </label>
+<label>
+Basis
+<select id="basis">
+<option value="Z">Z</option>
+<option value="X">X</option>
+<option value="Y">Y</option>
+</select>
+</label>
 
-      <label>
-        Shots
-        <input
-          id="shots"
-          type="number"
-          value="1000"
-          min="1"
-          max="100000">
-      </label>
+<label>
+Shots
+<input
+id="shots"
+type="number"
+value="1000"
+min="1"
+max="100000"
+style="width:100px">
+</label>
 
-      <button
-        class="primary"
-        onclick="runShots()">
-        Run
-      </button>
+<button class="primary" onclick="runShots()">Run</button>
 
-    </div>
+</div>
 
-    <div class="stats-grid">
+<h3 style="font-size:14px">Statevector</h3>
+<div id="stateVector" class="state-box"></div>
 
-      <div class="stat">
-        <div class="stat-label">Exact P(0)</div>
-        <div class="stat-value" id="p0"></div>
-      </div>
+<h3 style="font-size:14px;margin-top:16px">
+Measurement Histogram
+</h3>
 
-      <div class="stat">
-        <div class="stat-label">Exact P(1)</div>
-        <div class="stat-value" id="p1"></div>
-      </div>
+<div id="histogram" class="histogram"></div>
 
-    </div>
-
-    <div class="histogram">
-
-      <div class="bar-row">
-
-        <b>0</b>
-
-        <div class="bar-bg">
-          <div class="bar" id="bar0"></div>
-        </div>
-
-        <span id="count0"></span>
-
-      </div>
-
-      <div class="bar-row">
-
-        <b>1</b>
-
-        <div class="bar-bg">
-          <div class="bar" id="bar1"></div>
-        </div>
-
-        <span id="count1"></span>
-
-      </div>
-
-    </div>
-
-    <div
-      class="explanation"
-      id="explanation">
-    </div>
-
-  </section>
+</section>
 
 </div>
 
 
 <script>
 
-/* =========================================================
-   Circuit Data
-========================================================= */
+/* ==============================================
+   Configuration
+============================================== */
 
-let gates = [
-  { type: "RY", angle: 60 },
-  { type: "RZ", angle: 90 }
-];
+let nQubits = 3;
+const MAX_QUBITS = 6;
+
+/*
+ gate:
+ {
+   type: "RY",
+   target: 0,
+   angle: 36
+ }
+
+ or
+
+ {
+   type: "CNOT",
+   control:0,
+   target:1
+ }
+*/
+
+let gates = [];
 
 
-/* =========================================================
-   Complex Numbers
-========================================================= */
+/* ==============================================
+   Complex numbers
+============================================== */
 
-function C(re, im = 0) {
-  return { re, im };
+function C(re, im=0){
+  return {re,im};
 }
 
-function cAdd(a, b) {
+function cAdd(a,b){
+  return C(a.re+b.re,a.im+b.im);
+}
+
+function cMul(a,b){
   return C(
-    a.re + b.re,
-    a.im + b.im
+    a.re*b.re-a.im*b.im,
+    a.re*b.im+a.im*b.re
   );
 }
 
-function cMul(a, b) {
-  return C(
-    a.re * b.re - a.im * b.im,
-    a.re * b.im + a.im * b.re
-  );
+function cAbs2(a){
+  return a.re*a.re+a.im*a.im;
 }
 
-function abs2(a) {
-  return a.re * a.re + a.im * a.im;
-}
-
-function cExp(theta) {
-  return C(
-    Math.cos(theta),
-    Math.sin(theta)
-  );
+function cExp(t){
+  return C(Math.cos(t),Math.sin(t));
 }
 
 
-/* =========================================================
-   Apply Matrix
-========================================================= */
+/* ==============================================
+   Single Qubit Matrices
+============================================== */
 
-function applyGate(matrix, state) {
+function RX(t){
+  const c=Math.cos(t/2);
+  const s=Math.sin(t/2);
 
   return [
+    [C(c),C(0,-s)],
+    [C(0,-s),C(c)]
+  ];
+}
 
-    cAdd(
-      cMul(matrix[0][0], state[0]),
-      cMul(matrix[0][1], state[1])
-    ),
+function RY(t){
+  const c=Math.cos(t/2);
+  const s=Math.sin(t/2);
 
-    cAdd(
-      cMul(matrix[1][0], state[0]),
-      cMul(matrix[1][1], state[1])
+  return [
+    [C(c),C(-s)],
+    [C(s),C(c)]
+  ];
+}
+
+function RZ(t){
+  return [
+    [cExp(-t/2),C(0)],
+    [C(0),cExp(t/2)]
+  ];
+}
+
+function X(){
+  return [
+    [C(0),C(1)],
+    [C(1),C(0)]
+  ];
+}
+
+function Y(){
+  return [
+    [C(0),C(0,-1)],
+    [C(0,1),C(0)]
+  ];
+}
+
+function Z(){
+  return [
+    [C(1),C(0)],
+    [C(0),C(-1)]
+  ];
+}
+
+function H(){
+  const s=1/Math.sqrt(2);
+
+  return [
+    [C(s),C(s)],
+    [C(s),C(-s)]
+  ];
+}
+
+function S(){
+  return [
+    [C(1),C(0)],
+    [C(0),C(0,1)]
+  ];
+}
+
+function SDG(){
+  return [
+    [C(1),C(0)],
+    [C(0),C(0,-1)]
+  ];
+}
+
+function T(){
+  return [
+    [C(1),C(0)],
+    [C(0),cExp(Math.PI/4)]
+  ];
+}
+
+
+/* ==============================================
+   Statevector
+============================================== */
+
+function zeroState(){
+
+  const size=1<<nQubits;
+
+  const state=[];
+
+  for(let i=0;i<size;i++){
+    state.push(C(i===0?1:0,0));
+  }
+
+  return state;
+}
+
+
+/* ==============================================
+   Apply single-qubit gate
+============================================== */
+
+function applySingle(state,matrix,q){
+
+  const size=state.length;
+  const result=state.map(a=>C(a.re,a.im));
+
+  const mask=1<<q;
+
+  for(let i=0;i<size;i++){
+
+    if((i & mask)!==0) continue;
+
+    const j=i|mask;
+
+    const a0=state[i];
+    const a1=state[j];
+
+    result[i]=cAdd(
+      cMul(matrix[0][0],a0),
+      cMul(matrix[0][1],a1)
+    );
+
+    result[j]=cAdd(
+      cMul(matrix[1][0],a0),
+      cMul(matrix[1][1],a1)
+    );
+  }
+
+  return result;
+}
+
+
+/* ==============================================
+   CNOT
+============================================== */
+
+function applyCNOT(state,control,target){
+
+  const result=state.map(a=>C(a.re,a.im));
+
+  const cMask=1<<control;
+  const tMask=1<<target;
+
+  for(let i=0;i<state.length;i++){
+
+    if(
+      (i & cMask)!==0 &&
+      (i & tMask)===0
+    ){
+
+      const j=i|tMask;
+
+      result[i]=C(
+        state[j].re,
+        state[j].im
+      );
+
+      result[j]=C(
+        state[i].re,
+        state[i].im
+      );
+    }
+  }
+
+  return result;
+}
+
+
+/* ==============================================
+   CZ
+============================================== */
+
+function applyCZ(state,control,target){
+
+  const result=state.map(a=>C(a.re,a.im));
+
+  const cMask=1<<control;
+  const tMask=1<<target;
+
+  for(let i=0;i<state.length;i++){
+
+    if(
+      (i & cMask)!==0 &&
+      (i & tMask)!==0
+    ){
+      result[i].re*=-1;
+      result[i].im*=-1;
+    }
+  }
+
+  return result;
+}
+
+
+/* ==============================================
+   Run full circuit
+============================================== */
+
+function getState(){
+
+  let state=zeroState();
+
+  for(const g of gates){
+
+    if(g.type==="RX")
+      state=applySingle(
+        state,
+        RX(g.angle*Math.PI/180),
+        g.target
+      );
+
+    else if(g.type==="RY")
+      state=applySingle(
+        state,
+        RY(g.angle*Math.PI/180),
+        g.target
+      );
+
+    else if(g.type==="RZ")
+      state=applySingle(
+        state,
+        RZ(g.angle*Math.PI/180),
+        g.target
+      );
+
+    else if(g.type==="H")
+      state=applySingle(state,H(),g.target);
+
+    else if(g.type==="X")
+      state=applySingle(state,X(),g.target);
+
+    else if(g.type==="Y")
+      state=applySingle(state,Y(),g.target);
+
+    else if(g.type==="Z")
+      state=applySingle(state,Z(),g.target);
+
+    else if(g.type==="S")
+      state=applySingle(state,S(),g.target);
+
+    else if(g.type==="T")
+      state=applySingle(state,T(),g.target);
+
+    else if(g.type==="CNOT")
+      state=applyCNOT(
+        state,
+        g.control,
+        g.target
+      );
+
+    else if(g.type==="CZ")
+      state=applyCZ(
+        state,
+        g.control,
+        g.target
+      );
+  }
+
+  return state;
+}
+
+
+/* ==============================================
+   Bloch expectations
+============================================== */
+
+function expectationPauli(state,q,type){
+
+  let transformed;
+
+  if(type==="X")
+    transformed=applySingle(state,X(),q);
+
+  else if(type==="Y")
+    transformed=applySingle(state,Y(),q);
+
+  else
+    transformed=applySingle(state,Z(),q);
+
+
+  let re=0;
+
+  for(let i=0;i<state.length;i++){
+
+    const a=state[i];
+    const b=transformed[i];
+
+    // conjugate(a) * b
+    re += a.re*b.re + a.im*b.im;
+  }
+
+  return re;
+}
+
+
+function allBlochVectors(state){
+
+  const out=[];
+
+  for(let q=0;q<nQubits;q++){
+
+    const x=expectationPauli(state,q,"X");
+    const y=expectationPauli(state,q,"Y");
+    const z=expectationPauli(state,q,"Z");
+
+    out.push({
+      x,y,z,
+      r:Math.sqrt(x*x+y*y+z*z)
+    });
+  }
+
+  return out;
+}
+
+
+/* ==============================================
+   Measurement basis transform
+============================================== */
+
+function measurementState(state,basis){
+
+  let s=state.map(a=>C(a.re,a.im));
+
+  for(let q=0;q<nQubits;q++){
+
+    if(basis==="X"){
+
+      s=applySingle(
+        s,
+        H(),
+        q
+      );
+    }
+
+    else if(basis==="Y"){
+
+      s=applySingle(
+        s,
+        SDG(),
+        q
+      );
+
+      s=applySingle(
+        s,
+        H(),
+        q
+      );
+    }
+  }
+
+  return s;
+}
+
+
+/* ==============================================
+   Exact probabilities
+============================================== */
+
+function probabilities(state,basis){
+
+  const s=measurementState(
+    state,
+    basis
+  );
+
+  return s.map(cAbs2);
+}
+
+
+/* ==============================================
+   Sampling
+============================================== */
+
+function sampleDistribution(probs,shots){
+
+  const cumulative=[];
+
+  let sum=0;
+
+  for(const p of probs){
+
+    sum+=p;
+    cumulative.push(sum);
+  }
+
+
+  const counts=
+    Array(probs.length).fill(0);
+
+
+  for(let s=0;s<shots;s++){
+
+    const r=Math.random();
+
+    for(let i=0;i<cumulative.length;i++){
+
+      if(r<=cumulative[i]){
+        counts[i]++;
+        break;
+      }
+    }
+  }
+
+  return counts;
+}
+
+
+/* ==============================================
+   Bitstring
+============================================== */
+
+function bitString(index){
+
+  return index
+    .toString(2)
+    .padStart(nQubits,"0");
+}
+
+
+/* ==============================================
+   Qubit controls
+============================================== */
+
+function refreshSelectors(){
+
+  const ids=[
+    "targetQubit",
+    "controlQubit",
+    "twoTargetQubit"
+  ];
+
+  for(const id of ids){
+
+    const el=document.getElementById(id);
+
+    const current=
+      Number(el.value)||0;
+
+    el.innerHTML="";
+
+    for(let q=0;q<nQubits;q++){
+
+      const op=
+        document.createElement("option");
+
+      op.value=q;
+      op.textContent="q"+q;
+
+      el.appendChild(op);
+    }
+
+    el.value=
+      Math.min(
+        current,
+        nQubits-1
+      );
+  }
+
+  document.getElementById(
+    "qubitInfo"
+  ).textContent=
+    `${nQubits} qubits / ${1<<nQubits} state amplitudes`;
+}
+
+
+function addQubit(){
+
+  if(nQubits>=MAX_QUBITS){
+    alert("최대 6 qubits까지 지원합니다.");
+    return;
+  }
+
+  nQubits++;
+
+  refreshSelectors();
+  renderCircuit();
+  update();
+}
+
+
+function removeQubit(){
+
+  if(nQubits<=1) return;
+
+  nQubits--;
+
+  gates=gates.filter(g=>{
+
+    if(g.target>=nQubits)
+      return false;
+
+    if(
+      g.control!==undefined &&
+      g.control>=nQubits
     )
+      return false;
 
-  ];
+    return true;
+  });
 
+  refreshSelectors();
+  renderCircuit();
+  update();
 }
 
 
-/* =========================================================
-   Quantum Gates
-========================================================= */
+/* ==============================================
+   Gate editing
+============================================== */
 
-function RX(theta) {
+function addSingleGate(type){
 
-  const c = Math.cos(theta / 2);
-  const s = Math.sin(theta / 2);
+  const target=
+    Number(
+      document.getElementById(
+        "targetQubit"
+      ).value
+    );
 
-  return [
-    [C(c), C(0, -s)],
-    [C(0, -s), C(c)]
-  ];
-
-}
-
-
-function RY(theta) {
-
-  const c = Math.cos(theta / 2);
-  const s = Math.sin(theta / 2);
-
-  return [
-    [C(c), C(-s)],
-    [C(s), C(c)]
-  ];
-
-}
-
-
-function RZ(theta) {
-
-  return [
-    [cExp(-theta / 2), C(0)],
-    [C(0), cExp(theta / 2)]
-  ];
-
-}
-
-
-function X() {
-
-  return [
-    [C(0), C(1)],
-    [C(1), C(0)]
-  ];
-
-}
-
-
-function Y() {
-
-  return [
-    [C(0), C(0, -1)],
-    [C(0, 1), C(0)]
-  ];
-
-}
-
-
-function Z() {
-
-  return [
-    [C(1), C(0)],
-    [C(0), C(-1)]
-  ];
-
-}
-
-
-function H() {
-
-  const s = 1 / Math.sqrt(2);
-
-  return [
-    [C(s), C(s)],
-    [C(s), C(-s)]
-  ];
-
-}
-
-
-function S() {
-
-  return [
-    [C(1), C(0)],
-    [C(0), C(0, 1)]
-  ];
-
-}
-
-
-function T() {
-
-  return [
-    [C(1), C(0)],
-    [C(0), cExp(Math.PI / 4)]
-  ];
-
-}
-
-
-/* =========================================================
-   Circuit Editing
-========================================================= */
-
-function addGate(type) {
-
-  if (
-    type === "RX" ||
-    type === "RY" ||
-    type === "RZ"
-  ) {
+  if(
+    type==="RX" ||
+    type==="RY" ||
+    type==="RZ"
+  ){
 
     gates.push({
       type,
-      angle: 0
+      target,
+      angle:0
     });
 
-  } else {
+  }else{
 
     gates.push({
-      type
+      type,
+      target
     });
-
   }
 
   renderCircuit();
-  updateSimulation();
-
+  update();
 }
 
 
-function removeGate(index) {
+function addTwoGate(type){
 
-  gates.splice(index, 1);
+  const control=
+    Number(
+      document.getElementById(
+        "controlQubit"
+      ).value
+    );
 
-  renderCircuit();
-  updateSimulation();
+  const target=
+    Number(
+      document.getElementById(
+        "twoTargetQubit"
+      ).value
+    );
 
-}
+  if(control===target){
 
+    alert(
+      "Control과 Target은 서로 달라야 합니다."
+    );
 
-function moveGate(index, direction) {
-
-  const next = index + direction;
-
-  if (
-    next < 0 ||
-    next >= gates.length
-  ) return;
-
-
-  const temp = gates[index];
-
-  gates[index] = gates[next];
-  gates[next] = temp;
-
-
-  renderCircuit();
-  updateSimulation();
-
-}
-
-
-function setAngle(index, value) {
-
-  gates[index].angle =
-    Number(value);
-
-  updateSimulation();
-
-}
-
-
-function clearCircuit() {
-
-  gates = [];
-
-  renderCircuit();
-  updateSimulation();
-  runShots();
-
-}
-
-
-function presetRYRZ() {
-
-  gates = [
-    {
-      type: "RY",
-      angle: 60
-    },
-    {
-      type: "RZ",
-      angle: 90
-    }
-  ];
-
-  renderCircuit();
-  updateSimulation();
-  runShots();
-
-}
-
-
-function resetAll() {
-
-  gates = [];
-
-  document.getElementById("basis").value = "Z";
-  document.getElementById("shots").value = 1000;
-
-  renderCircuit();
-  updateSimulation();
-  runShots();
-
-}
-
-
-/* =========================================================
-   Render Circuit
-========================================================= */
-
-function renderCircuit() {
-
-  const container =
-    document.getElementById("circuit");
-
-  container.innerHTML = "";
-
-
-  const ket =
-    document.createElement("div");
-
-  ket.className = "ket";
-  ket.textContent = "|0⟩";
-
-  container.appendChild(ket);
-
-
-  if (gates.length === 0) {
-
-    const wire =
-      document.createElement("div");
-
-    wire.className = "wire";
-
-    container.appendChild(wire);
-
-
-    const empty =
-      document.createElement("div");
-
-    empty.className = "empty-circuit";
-    empty.textContent = "Gate Palette에서 게이트를 추가하세요.";
-
-    container.appendChild(empty);
-
+    return;
   }
 
-
-  gates.forEach((gate, index) => {
-
-    const wire =
-      document.createElement("div");
-
-    wire.className = "wire";
-
-    container.appendChild(wire);
-
-
-    const card =
-      document.createElement("div");
-
-    card.className = "gate-card";
-
-
-    const title =
-      document.createElement("div");
-
-    title.className = "gate-name";
-    title.textContent = gate.type;
-
-    card.appendChild(title);
-
-
-    if (
-      gate.type === "RX" ||
-      gate.type === "RY" ||
-      gate.type === "RZ"
-    ) {
-
-      const input =
-        document.createElement("input");
-
-      input.className = "gate-angle";
-      input.type = "number";
-      input.value = gate.angle;
-      input.step = "1";
-
-      input.oninput = function() {
-        setAngle(
-          index,
-          this.value
-        );
-      };
-
-      card.appendChild(input);
-
-
-      const degree =
-        document.createElement("span");
-
-      degree.textContent = " °";
-
-      card.appendChild(degree);
-
-    }
-
-
-    const actions =
-      document.createElement("div");
-
-    actions.className = "gate-actions";
-
-
-    const left =
-      document.createElement("button");
-
-    left.textContent = "←";
-
-    left.onclick = function() {
-      moveGate(
-        index,
-        -1
-      );
-    };
-
-
-    const right =
-      document.createElement("button");
-
-    right.textContent = "→";
-
-    right.onclick = function() {
-      moveGate(
-        index,
-        1
-      );
-    };
-
-
-    const del =
-      document.createElement("button");
-
-    del.textContent = "×";
-
-    del.onclick = function() {
-      removeGate(index);
-    };
-
-
-    actions.appendChild(left);
-    actions.appendChild(right);
-    actions.appendChild(del);
-
-    card.appendChild(actions);
-
-    container.appendChild(card);
-
+  gates.push({
+    type,
+    control,
+    target
   });
 
-
-  const wire =
-    document.createElement("div");
-
-  wire.className = "wire";
-
-  container.appendChild(wire);
-
-
-  const measure =
-    document.createElement("div");
-
-  measure.className = "measure-gate";
-  measure.textContent = "◉";
-
-  container.appendChild(measure);
-
+  renderCircuit();
+  update();
 }
 
 
-/* =========================================================
-   State Calculation
-========================================================= */
+function removeGate(i){
 
-function getState() {
+  gates.splice(i,1);
 
-  let state = [
-    C(1, 0),
-    C(0, 0)
+  renderCircuit();
+  update();
+}
+
+
+function moveGate(i,d){
+
+  const j=i+d;
+
+  if(j<0||j>=gates.length)
+    return;
+
+  [gates[i],gates[j]]=
+    [gates[j],gates[i]];
+
+  renderCircuit();
+  update();
+}
+
+
+function setAngle(i,value){
+
+  gates[i].angle=
+    Number(value);
+
+  update();
+}
+
+
+function clearCircuit(){
+
+  gates=[];
+
+  renderCircuit();
+  update();
+}
+
+
+function resetAll(){
+
+  nQubits=3;
+  gates=[];
+
+  document.getElementById(
+    "basis"
+  ).value="Z";
+
+  document.getElementById(
+    "shots"
+  ).value=1000;
+
+  refreshSelectors();
+  renderCircuit();
+  update();
+  runShots();
+}
+
+
+/* ==============================================
+   QRC preset
+============================================== */
+
+function qrcPreset(){
+
+  nQubits=3;
+
+  gates=[
+
+    {
+      type:"RY",
+      target:0,
+      angle:36
+    },
+
+    {
+      type:"RY",
+      target:1,
+      angle:90
+    },
+
+    {
+      type:"RY",
+      target:2,
+      angle:144
+    },
+
+    {
+      type:"CNOT",
+      control:0,
+      target:1
+    },
+
+    {
+      type:"CNOT",
+      control:1,
+      target:2
+    }
+
   ];
 
-
-  for (const gate of gates) {
-
-    if (gate.type === "RX") {
-
-      state = applyGate(
-        RX(
-          gate.angle *
-          Math.PI / 180
-        ),
-        state
-      );
-
-    }
-
-
-    else if (gate.type === "RY") {
-
-      state = applyGate(
-        RY(
-          gate.angle *
-          Math.PI / 180
-        ),
-        state
-      );
-
-    }
-
-
-    else if (gate.type === "RZ") {
-
-      state = applyGate(
-        RZ(
-          gate.angle *
-          Math.PI / 180
-        ),
-        state
-      );
-
-    }
-
-
-    else if (gate.type === "H") {
-      state = applyGate(H(), state);
-    }
-
-    else if (gate.type === "X") {
-      state = applyGate(X(), state);
-    }
-
-    else if (gate.type === "Y") {
-      state = applyGate(Y(), state);
-    }
-
-    else if (gate.type === "Z") {
-      state = applyGate(Z(), state);
-    }
-
-    else if (gate.type === "S") {
-      state = applyGate(S(), state);
-    }
-
-    else if (gate.type === "T") {
-      state = applyGate(T(), state);
-    }
-
-  }
-
-
-  return state;
-
+  refreshSelectors();
+  renderCircuit();
+  update();
+  runShots();
 }
 
 
-/* =========================================================
-   Bloch Coordinates
-========================================================= */
+/* ==============================================
+   Render circuit
+============================================== */
 
-function bloch(state) {
+function renderCircuit(){
 
-  const a = state[0];
-  const b = state[1];
-
-
-  const conjA =
-    C(
-      a.re,
-      -a.im
+  const container=
+    document.getElementById(
+      "circuit"
     );
 
-
-  const ab =
-    cMul(
-      conjA,
-      b
-    );
+  container.innerHTML="";
 
 
-  return {
+  for(let q=0;q<nQubits;q++){
 
-    x: 2 * ab.re,
+    const lane=
+      document.createElement("div");
 
-    y: 2 * ab.im,
+    lane.className="lane";
 
-    z:
-      abs2(a) -
-      abs2(b)
 
-  };
+    const label=
+      document.createElement("div");
 
+    label.className="q-label";
+    label.textContent=`q${q} |0⟩`;
+
+    lane.appendChild(label);
+
+
+    gates.forEach((g,i)=>{
+
+      const wire=
+        document.createElement("div");
+
+      wire.className="wire";
+
+      lane.appendChild(wire);
+
+
+      const relevant=
+        g.target===q ||
+        g.control===q;
+
+
+      if(!relevant){
+
+        const spacer=
+          document.createElement("div");
+
+        spacer.className="placeholder";
+
+        lane.appendChild(spacer);
+
+        return;
+      }
+
+
+      const card=
+        document.createElement("div");
+
+      card.className="gate-card";
+
+
+      const name=
+        document.createElement("div");
+
+      name.className="gate-name";
+
+
+      if(
+        g.type==="CNOT" ||
+        g.type==="CZ"
+      ){
+
+        if(g.control===q)
+          name.textContent=
+            `${g.type} ●`;
+
+        else
+          name.textContent=
+            `${g.type} ⊕`;
+
+      }else{
+
+        name.textContent=
+          g.type;
+      }
+
+
+      card.appendChild(name);
+
+
+      const meta=
+        document.createElement("div");
+
+      meta.className="gate-meta";
+
+
+      if(
+        g.type==="CNOT" ||
+        g.type==="CZ"
+      ){
+
+        meta.textContent=
+          `q${g.control} → q${g.target}`;
+
+      }else{
+
+        meta.textContent=
+          `target q${g.target}`;
+      }
+
+
+      card.appendChild(meta);
+
+
+      if(
+        g.type==="RX" ||
+        g.type==="RY" ||
+        g.type==="RZ"
+      ){
+
+        const inp=
+          document.createElement("input");
+
+        inp.type="number";
+        inp.className="angle-input";
+        inp.value=g.angle;
+
+        inp.oninput=function(){
+
+          setAngle(
+            i,
+            this.value
+          );
+        };
+
+        card.appendChild(inp);
+
+        card.appendChild(
+          document.createTextNode("°")
+        );
+      }
+
+
+      /*
+        editing buttons only once
+        show them on target lane
+      */
+
+      if(g.target===q){
+
+        const actions=
+          document.createElement("div");
+
+        actions.className="actions";
+
+
+        const left=
+          document.createElement("button");
+
+        left.textContent="←";
+
+        left.onclick=
+          ()=>moveGate(i,-1);
+
+
+        const right=
+          document.createElement("button");
+
+        right.textContent="→";
+
+        right.onclick=
+          ()=>moveGate(i,1);
+
+
+        const del=
+          document.createElement("button");
+
+        del.textContent="×";
+
+        del.onclick=
+          ()=>removeGate(i);
+
+
+        actions.append(
+          left,
+          right,
+          del
+        );
+
+        card.appendChild(actions);
+      }
+
+
+      lane.appendChild(card);
+
+    });
+
+
+    const endWire=
+      document.createElement("div");
+
+    endWire.className="wire";
+
+    lane.appendChild(endWire);
+
+
+    const m=
+      document.createElement("div");
+
+    m.textContent="M";
+    m.style.padding="9px 13px";
+    m.style.borderRadius="6px";
+    m.style.background="#3d4663";
+
+    lane.appendChild(m);
+
+
+    container.appendChild(lane);
+  }
 }
 
 
-/* =========================================================
-   Measurement
-========================================================= */
+/* ==============================================
+   Draw Bloch sphere
+============================================== */
 
-function measurementProbability(
-  state,
-  basis
-) {
+function drawBloch(vectors){
 
-  const v =
-    bloch(state);
-
-  let exp;
-
-
-  if (basis === "X") {
-    exp = v.x;
-  }
-
-  else if (basis === "Y") {
-    exp = v.y;
-  }
-
-  else {
-    exp = v.z;
-  }
-
-
-  let p0 =
-    (1 + exp) / 2;
-
-
-  p0 =
-    Math.min(
-      1,
-      Math.max(
-        0,
-        p0
-      )
-    );
-
-
-  return {
-
-    p0,
-
-    p1: 1 - p0,
-
-    expectation: exp
-
-  };
-
-}
-
-
-/* =========================================================
-   Sampling
-========================================================= */
-
-function sampleShots(
-  p0,
-  shots
-) {
-
-  let zero = 0;
-
-
-  for (
-    let i = 0;
-    i < shots;
-    i++
-  ) {
-
-    if (
-      Math.random() < p0
-    ) {
-
-      zero++;
-
-    }
-
-  }
-
-
-  return {
-
-    zero,
-    one: shots - zero
-
-  };
-
-}
-
-
-/* =========================================================
-   Bloch Sphere
-========================================================= */
-
-function drawBloch(v) {
-
-  const canvas =
+  const canvas=
     document.getElementById(
       "blochCanvas"
     );
 
-  const ctx =
+  const ctx=
     canvas.getContext("2d");
 
 
-  const w = canvas.width;
-  const h = canvas.height;
-
   ctx.clearRect(
-    0,
-    0,
-    w,
-    h
+    0,0,
+    canvas.width,
+    canvas.height
   );
 
 
-  const cx = w / 2;
-  const cy = h / 2;
-  const r = 145;
+  const cx=
+    canvas.width/2;
+
+  const cy=
+    canvas.height/2;
+
+  const r=155;
 
 
-  /* Sphere */
+  /* sphere */
 
-  ctx.strokeStyle = "#60769c";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle="#60769c";
+  ctx.lineWidth=2;
 
   ctx.beginPath();
 
   ctx.arc(
-    cx,
-    cy,
-    r,
+    cx,cy,r,
     0,
-    Math.PI * 2
+    Math.PI*2
   );
 
   ctx.stroke();
 
 
-  /* Equator */
+  /* equator */
 
-  ctx.strokeStyle = "#344766";
+  ctx.strokeStyle="#354766";
 
   ctx.beginPath();
 
   ctx.ellipse(
-    cx,
-    cy,
+    cx,cy,
     r,
-    r * 0.32,
+    r*.32,
     0,
     0,
-    Math.PI * 2
+    Math.PI*2
   );
 
   ctx.stroke();
 
 
-  /* Z axis */
+  /* axes */
 
-  ctx.strokeStyle = "#7185aa";
+  ctx.strokeStyle="#7185aa";
 
   ctx.beginPath();
 
   ctx.moveTo(
     cx,
-    cy - r - 30
+    cy-r-30
   );
 
   ctx.lineTo(
     cx,
-    cy + r + 30
+    cy+r+30
   );
 
   ctx.stroke();
 
-
-  /* X axis */
 
   ctx.beginPath();
 
   ctx.moveTo(
-    cx - r - 30,
+    cx-r-30,
     cy
   );
 
   ctx.lineTo(
-    cx + r + 30,
+    cx+r+30,
     cy
   );
 
   ctx.stroke();
 
 
-  ctx.fillStyle = "#cbd7ef";
-  ctx.font = "16px Arial";
+  ctx.beginPath();
 
+  ctx.moveTo(
+    cx-r*.72,
+    cy+r*.36
+  );
+
+  ctx.lineTo(
+    cx+r*.72,
+    cy-r*.36
+  );
+
+  ctx.stroke();
+
+
+  ctx.fillStyle="#cbd7ef";
+  ctx.font="15px Arial";
 
   ctx.fillText(
     "+Z",
-    cx + 8,
-    cy - r - 15
+    cx+8,
+    cy-r-15
   );
 
   ctx.fillText(
     "-Z",
-    cx + 8,
-    cy + r + 25
+    cx+8,
+    cy+r+23
   );
 
   ctx.fillText(
     "+X",
-    cx + r + 15,
-    cy - 5
-  );
-
-  ctx.fillText(
-    "-X",
-    cx - r - 42,
-    cy - 5
-  );
-
-
-  /* Y axis */
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    cx - r * 0.7,
-    cy + r * 0.35
-  );
-
-  ctx.lineTo(
-    cx + r * 0.7,
-    cy - r * 0.35
-  );
-
-  ctx.stroke();
-
-
-  ctx.fillText(
-    "+Y",
-    cx + r * 0.7,
-    cy - r * 0.35 - 5
-  );
-
-
-  /* Perspective projection */
-
-  const px =
-    cx +
-    v.x * r +
-    v.y * r * 0.45;
-
-
-  const py =
-    cy -
-    v.z * r -
-    v.y * r * 0.25;
-
-
-  /* Vector */
-
-  ctx.strokeStyle = "#57b7ff";
-  ctx.lineWidth = 5;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    cx,
+    cx+r+12,
     cy
   );
 
-  ctx.lineTo(
-    px,
-    py
-  );
-
-  ctx.stroke();
-
-
-  ctx.fillStyle = "#57b7ff";
-
-  ctx.beginPath();
-
-  ctx.arc(
-    px,
-    py,
-    8,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-
-  ctx.fillStyle = "#d9e8ff";
-
   ctx.fillText(
-    "|ψ⟩",
-    px + 12,
-    py - 10
+    "+Y",
+    cx+r*.72,
+    cy-r*.36-7
   );
 
+
+  const colors=[
+    "#57b7ff",
+    "#ff6b7a",
+    "#65d488",
+    "#ffc857",
+    "#c084fc",
+    "#ff9f43"
+  ];
+
+
+  vectors.forEach((v,q)=>{
+
+    const px=
+      cx+
+      v.x*r+
+      v.y*r*.45;
+
+    const py=
+      cy-
+      v.z*r-
+      v.y*r*.25;
+
+
+    ctx.strokeStyle=
+      colors[q];
+
+    ctx.lineWidth=4;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(cx,cy);
+
+    ctx.lineTo(px,py);
+
+    ctx.stroke();
+
+
+    ctx.fillStyle=
+      colors[q];
+
+    ctx.beginPath();
+
+    ctx.arc(
+      px,py,
+      7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.font=
+      "bold 14px Arial";
+
+    ctx.fillText(
+      "q"+q,
+      px+9,
+      py-7
+    );
+  });
 }
 
 
-/* =========================================================
-   Simulation Update
-========================================================= */
+/* ==============================================
+   Bloch table
+============================================== */
 
-function updateSimulation() {
+function renderBlochTable(vectors){
 
-  const state =
-    getState();
+  const tbody=
+    document.getElementById(
+      "blochTable"
+    );
 
-  const v =
-    bloch(state);
-
-
-  document.getElementById(
-    "xExp"
-  ).textContent =
-    v.x.toFixed(4);
+  tbody.innerHTML="";
 
 
-  document.getElementById(
-    "yExp"
-  ).textContent =
-    v.y.toFixed(4);
+  vectors.forEach((v,q)=>{
 
+    const tr=
+      document.createElement("tr");
 
-  document.getElementById(
-    "zExp"
-  ).textContent =
-    v.z.toFixed(4);
+    tr.innerHTML=`
+      <td>q${q}</td>
+      <td>${v.x.toFixed(4)}</td>
+      <td>${v.y.toFixed(4)}</td>
+      <td>${v.z.toFixed(4)}</td>
+      <td>${v.r.toFixed(4)}</td>
+    `;
 
-
-  const a = state[0];
-  const b = state[1];
-
-
-  document.getElementById(
-    "stateText"
-  ).textContent =
-    `${a.re.toFixed(3)}${a.im >= 0 ? "+" : ""}${a.im.toFixed(3)}i |0⟩ `
-    +
-    `+ ${b.re.toFixed(3)}${b.im >= 0 ? "+" : ""}${b.im.toFixed(3)}i |1⟩`;
-
-
-  drawBloch(v);
-
-  updateExactMeasurement();
-
+    tbody.appendChild(tr);
+  });
 }
 
 
-/* =========================================================
-   Exact Measurement UI
-========================================================= */
+/* ==============================================
+   State vector display
+============================================== */
 
-function updateExactMeasurement() {
+function renderStateVector(state){
 
-  const state =
+  const el=
+    document.getElementById(
+      "stateVector"
+    );
+
+  let html="";
+
+
+  state.forEach((a,i)=>{
+
+    if(cAbs2(a)<1e-10)
+      return;
+
+
+    html+=
+      `${a.re.toFixed(4)}`
+      +
+      `${a.im>=0?"+":""}`
+      +
+      `${a.im.toFixed(4)}i`
+      +
+      ` |${bitString(i)}⟩`
+      +
+      `<br>`;
+  });
+
+
+  el.innerHTML=
+    html || "0";
+}
+
+
+/* ==============================================
+   Histogram
+============================================== */
+
+function renderHistogram(
+  probs,
+  counts,
+  shots
+){
+
+  const root=
+    document.getElementById(
+      "histogram"
+    );
+
+  root.innerHTML="";
+
+
+  probs.forEach((p,i)=>{
+
+    /*
+      hide negligible outcomes unless sampled
+    */
+
+    if(
+      p<0.0001 &&
+      (!counts || counts[i]===0)
+    )
+      return;
+
+
+    const count=
+      counts ? counts[i] : 0;
+
+
+    const sampled=
+      shots>0
+      ? count/shots
+      : 0;
+
+
+    const row=
+      document.createElement("div");
+
+    row.className="bar-row";
+
+
+    const label=
+      document.createElement("b");
+
+    label.textContent=
+      bitString(i);
+
+
+    const bg=
+      document.createElement("div");
+
+    bg.className="bar-bg";
+
+
+    const bar=
+      document.createElement("div");
+
+    bar.className="bar";
+
+    bar.style.width=
+      ((counts?sampled:p)*100)
+      +"%";
+
+
+    bg.appendChild(bar);
+
+
+    const text=
+      document.createElement("span");
+
+
+    if(counts){
+
+      text.textContent=
+        `${count}/${shots} `
+        +
+        `(${(sampled*100).toFixed(1)}%)`;
+
+    }else{
+
+      text.textContent=
+        `Exact ${(p*100).toFixed(2)}%`;
+    }
+
+
+    row.append(
+      label,
+      bg,
+      text
+    );
+
+    root.appendChild(row);
+  });
+}
+
+
+/* ==============================================
+   Main Update
+============================================== */
+
+function update(){
+
+  const state=
     getState();
 
+  const vectors=
+    allBlochVectors(state);
 
-  const basis =
+
+  drawBloch(vectors);
+
+  renderBlochTable(vectors);
+
+  renderStateVector(state);
+
+
+  const basis=
     document.getElementById(
       "basis"
     ).value;
 
 
-  const result =
-    measurementProbability(
+  const probs=
+    probabilities(
       state,
       basis
     );
 
 
-  document.getElementById(
-    "p0"
-  ).textContent =
-    (result.p0 * 100)
-    .toFixed(2)
-    + "%";
-
-
-  document.getElementById(
-    "p1"
-  ).textContent =
-    (result.p1 * 100)
-    .toFixed(2)
-    + "%";
-
-
-  let msg;
-
-
-  if (basis === "Z") {
-
-    msg =
-      "Z-basis 측정입니다. 마지막에 RZ만 변경하면 "
-      +
-      "Bloch vector의 X/Y 방향은 바뀌지만 Z 좌표는 그대로이므로 "
-      +
-      "P(0), P(1)이 변하지 않을 수 있습니다.";
-
-  }
-
-  else if (basis === "X") {
-
-    msg =
-      "X-basis 측정입니다. RZ가 만든 phase 변화가 X 성분에 나타날 수 있으므로 "
-      +
-      "RZ 값을 바꾸면 측정확률이 달라질 수 있습니다.";
-
-  }
-
-  else {
-
-    msg =
-      "Y-basis 측정입니다. RZ가 만든 phase 변화가 Y 성분에 나타날 수 있으므로 "
-      +
-      "RZ 값을 바꾸면 측정확률이 달라질 수 있습니다.";
-
-  }
-
-
-  document.getElementById(
-    "explanation"
-  ).textContent = msg;
-
+  renderHistogram(
+    probs,
+    null,
+    0
+  );
 }
 
 
-/* =========================================================
-   Run Shots
-========================================================= */
+/* ==============================================
+   Run shots
+============================================== */
 
-function runShots() {
+function runShots(){
 
-  const state =
+  const state=
     getState();
 
 
-  const basis =
+  const basis=
     document.getElementById(
       "basis"
     ).value;
 
 
-  const shots =
+  const shots=
     Math.max(
       1,
       Number(
@@ -1497,78 +1828,49 @@ function runShots() {
     );
 
 
-  const exact =
-    measurementProbability(
+  const probs=
+    probabilities(
       state,
       basis
     );
 
 
-  const sampled =
-    sampleShots(
-      exact.p0,
+  const counts=
+    sampleDistribution(
+      probs,
       shots
     );
 
 
-  const p0 =
-    sampled.zero / shots;
-
-
-  const p1 =
-    sampled.one / shots;
-
-
-  document.getElementById(
-    "bar0"
-  ).style.width =
-    (p0 * 100) + "%";
-
-
-  document.getElementById(
-    "bar1"
-  ).style.width =
-    (p1 * 100) + "%";
-
-
-  document.getElementById(
-    "count0"
-  ).textContent =
-    `${sampled.zero} / ${shots} (${(p0 * 100).toFixed(1)}%)`;
-
-
-  document.getElementById(
-    "count1"
-  ).textContent =
-    `${sampled.one} / ${shots} (${(p1 * 100).toFixed(1)}%)`;
-
+  renderHistogram(
+    probs,
+    counts,
+    shots
+  );
 }
 
 
-/* =========================================================
+/* ==============================================
    Events
-========================================================= */
+============================================== */
 
 document.getElementById(
   "basis"
 ).addEventListener(
   "change",
-  function() {
-
-    updateSimulation();
+  ()=>{
+    update();
     runShots();
-
   }
 );
 
 
-/* =========================================================
+/* ==============================================
    Initial
-========================================================= */
+============================================== */
 
-renderCircuit();
-updateSimulation();
-runShots();
+refreshSelectors();
+qrcPreset();
 
 </script>
 
